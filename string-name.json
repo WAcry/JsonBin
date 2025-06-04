@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/schemas/string-name.json",
+  "$id": "https://github.com/WAcry/JsonBin/blob/main/string-name.json",
   "description": "用于校验 name 字段的简单 schema",
   "type": "string",
   "minLength": 1
