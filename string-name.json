@@ -1,7 +1,300 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/WAcry/JsonBin/refs/heads/main/string-name.json",
-  "description": "用于校验 name 字段的简单 schema",
-  "type": "string",
-  "minLength": 1
+  "type": "object",
+  "properties": {
+    "RankingFlowRegistry": { "$ref": "#/$defs/rankingFlowRegistry" },
+    "RankingTraitRegistry": { "$ref": "#/$defs/rankingTraitRegistry" },
+    "RankingStageRegistry": { "$ref": "#/$defs/rankingStageRegistry" },
+    "CandidateGeneratorRegistry": { "$ref": "#/$defs/genericComponentOrStrictFetcherRegistry" },
+    "CandidateFilterRegistry": { "$ref": "#/$defs/genericComponentOrStrictFetcherRegistry" },
+    "CandidateScorerRegistry": { "$ref": "#/$defs/genericComponentOrStrictFetcherRegistry" },
+    "CandidateProcessorRegistry": { "$ref": "#/$defs/genericComponentOrStrictFetcherRegistry" },
+    "ContextFeatureFetcherRegistry": { "$ref": "#/$defs/genericComponentOrStrictFetcherRegistry" },
+    "CandidateFeatureFetcherRegistry": { "$ref": "#/$defs/genericComponentOrStrictFetcherRegistry" },
+    "ExperimentRegistry": { "$ref": "#/$defs/experimentRegistry" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "cacheSettings": {
+      "type": "object",
+      "properties": {
+        "RedisEnabled": { "type": "boolean" },
+        "RedisTTL": { "type": "string", "format": "time-span" },
+        "EnableMessagePack": { "type": "boolean" },
+        "CustomRedisClusterName": { "type": "string" },
+        "RedisJitterPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "RedisStaleGracePercentage": { "type": "integer", "minimum": 0 },
+        "RedisProactiveRefreshPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "LocalEnabled": { "type": "boolean" },
+        "LocalTTL": { "type": "string", "format": "time-span" },
+        "LocalJitterPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "LocalStaleGracePercentage": { "type": "integer", "minimum": 0 },
+        "LocalProactiveRefreshPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "JitterPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "StaleGracePercentage": { "type": "integer", "minimum": 0 },
+        "ProactiveRefreshPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "ReadThroughPercentage": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "additionalProperties": false
+    },
+    "batchCacheSettings": {
+      "type": "object",
+      "properties": {
+        "RedisEnabled": { "type": "boolean" },
+        "RedisTTL": { "type": "string", "format": "time-span" },
+        "EnableMessagePack": { "type": "boolean" },
+        "CustomRedisClusterName": { "type": "string" },
+        "RedisJitterPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "RedisStaleGracePercentage": { "type": "integer", "minimum": 0 },
+        "RedisProactiveRefreshPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "LocalEnabled": { "type": "boolean" },
+        "LocalTTL": { "type": "string", "format": "time-span" },
+        "LocalJitterPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "LocalStaleGracePercentage": { "type": "integer", "minimum": 0 },
+        "LocalProactiveRefreshPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "JitterPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "StaleGracePercentage": { "type": "integer", "minimum": 0 },
+        "ProactiveRefreshPercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "ReadThroughPercentage": { "type": "number", "minimum": 0, "maximum": 100 },
+        "RedisBatchSize": { "type": "integer", "minimum": 1 },
+        "RedisDegreeOfParallelism": { "type": "integer", "minimum": 1 },
+        "BatchSize": { "type": "integer", "minimum": 1 },
+        "DegreeOfParallelism": { "type": "integer", "minimum": 1 },
+        "DisableFallback": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "featureLogSettings": {
+      "type": "object",
+      "properties": {
+        "EnablePercentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "ContextualFeatureBlackList": { "type": "array", "items": { "type": "string" } },
+        "CandidateFeatureWhiteList": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "concurrentSettings": {
+      "type": "object",
+      "properties": {
+        "MaxItemPerBatch": { "type": "integer", "minimum": 1 },
+        "MaxDegreeOfParallelism": { "type": "integer", "minimum": 1 },
+        "DisableFallback": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "rankingFlowDefinition": {
+        "type": "object",
+        "properties": {
+          "Traits": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "Settings": {
+            "type": "object",
+            "properties": {
+              "ContextFeatureFetchers": { "type": "array", "items": { "type": "string" } }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+    },
+    "rankingFlowRegistry": {
+      "type": "object",
+      "patternProperties": {
+        "^\\w+$": { "$ref": "#/$defs/rankingFlowDefinition" }
+      },
+      "additionalProperties": false
+    },
+    "rankingTraitDefinition": {
+        "type": "object",
+        "properties": {
+          "Stages": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "Settings": {
+            "type": "object",
+            "properties": {
+              "EmptyResponseAllowed": { "type": "boolean" },
+              "TimeoutInMs": { "type": "integer", "minimum": 0 },
+              "Condition": { "type": "string" },
+              "CacheSettings": { "$ref": "#/$defs/cacheSettings" },
+              "CacheKeyFeatures": { "type": "array", "items": { "type": "string" } },
+              "FeatureLogSettings": { "$ref": "#/$defs/featureLogSettings" },
+              "FunnelLogSamplingRate": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+    },
+    "rankingTraitRegistry": {
+      "type": "object",
+      "patternProperties": {
+        "^\\w+$": { "$ref": "#/$defs/rankingTraitDefinition" }
+      },
+      "additionalProperties": false
+    },
+    "rankingStageDefinition": {
+        "type": "object",
+        "properties": {
+          "CandidateGenerators": { "type": "array", "items": { "type": "string" } },
+          "CandidateFeatureFetchers": { "type": "array", "items": { "type": "string" } },
+          "CandidateFilters": { "type": "array", "items": { "type": "string" } },
+          "CandidateScorer": { "type": "string" },
+          "CandidateProcessors": { "type": "array", "items": { "type": "string" } },
+          "Settings": {
+            "type": "object",
+            "properties": {
+              "CacheSettings": { "$ref": "#/$defs/cacheSettings" },
+              "CacheKeyFeatures": { "type": "array", "items": { "type": "string" } }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+    },
+    "rankingStageRegistry": {
+      "type": "object",
+      "patternProperties": {
+        "^\\w+$": { "$ref": "#/$defs/rankingStageDefinition" }
+      },
+      "additionalProperties": false
+    },
+    "genericComponentProperties": {
+      "type": "object",
+      "properties": {
+        "Id": { "type": "string" },
+        "CacheSettings": { "$ref": "#/$defs/cacheSettings" },
+        "BatchCacheSettings": { "$ref": "#/$defs/batchCacheSettings" },
+        "ConcurrentSettings": { "$ref": "#/$defs/concurrentSettings" }
+      },
+      "required": [ "Id" ],
+      "additionalProperties": true
+    },
+    "genericComponentConfig": {
+      "type": "object",
+      "properties": {
+        "Type": {
+            "type": "string",
+            "not": { "enum": ["FrostCandidateFeatureFetcher", "FrostContextFeatureFetcher"] }
+        },
+        "Properties": { "$ref": "#/$defs/genericComponentProperties" },
+        "Parameters": { "type": "object", "additionalProperties": true }
+      },
+      "required": [ "Type" ],
+      "additionalProperties": false
+    },
+    "frostContextFeatureFetcherProperties": {
+      "type": "object",
+      "properties": {
+        "Id": { "type": "string" },
+        "FeatureServiceName": { "type": "string" },
+        "JoinKey": { "type": "string" },
+        "FeatureNames": { "type": "array", "items": { "type": "string" } },
+        "CustomKey": { "type": "string" },
+        "CacheKeyFeatures": { "type": "array", "items": { "type": "string" } },
+        "FeatureNamePrefixToRemove": { "type": "string" },
+        "FeatureNameAliases": { "type": "object", "additionalProperties": { "type": "string" } },
+        "NonEmptyIndicator": { "type": "string" },
+        "CacheSettings": { "$ref": "#/$defs/cacheSettings" }
+      },
+      "required": [ "Id", "FeatureServiceName", "JoinKey", "FeatureNames" ],
+      "additionalProperties": false 
+    },
+    "frostContextFeatureFetcherConfig": {
+      "type": "object",
+      "properties": {
+        "Type": { "const": "FrostContextFeatureFetcher" },
+        "Properties": { "$ref": "#/$defs/frostContextFeatureFetcherProperties" },
+        "Parameters": { "type": "object", "additionalProperties": true }
+      },
+      "required": [ "Type", "Properties" ],
+      "additionalProperties": false
+    },
+    "frostCandidateFeatureFetcherProperties": {
+      "type": "object",
+      "properties": {
+        "Id": { "type": "string" },
+        "CandidateCorpus": { "type": "string" },
+        "FeatureServiceName": { "type": "string" },
+        "JoinKey": { "type": "string" },
+        "FeatureNames": { "type": "array", "items": { "type": "string" } },
+        "CustomKey": { "type": "string" },
+        "CacheKeyFeatures": { "type": "array", "items": { "type": "string" } },
+        "FeatureNamePrefixToRemove": { "type": "string" },
+        "FeatureNameAliases": { "type": "object", "additionalProperties": { "type": "string" } },
+        "NonEmptyIndicator": { "type": "string" },
+        "BatchCacheSettings": { "$ref": "#/$defs/batchCacheSettings" }
+      },
+      "required": [ "Id", "CandidateCorpus", "FeatureServiceName", "JoinKey", "FeatureNames" ],
+      "additionalProperties": false 
+    },
+    "frostCandidateFeatureFetcherConfig": {
+      "type": "object",
+      "properties": {
+        "Type": { "const": "FrostCandidateFeatureFetcher" },
+        "Properties": { "$ref": "#/$defs/frostCandidateFeatureFetcherProperties" },
+        "Parameters": { "type": "object", "additionalProperties": true }
+      },
+      "required": [ "Type", "Properties" ],
+      "additionalProperties": false
+    },
+    "genericComponentOrStrictFetcherRegistry": {
+      "type": "object",
+      "patternProperties": {
+        "^\\w+$": {
+          "oneOf": [
+            { "$ref": "#/$defs/frostContextFeatureFetcherConfig" },
+            { "$ref": "#/$defs/frostCandidateFeatureFetcherConfig" },
+            { "$ref": "#/$defs/genericComponentConfig" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "experimentComponentOverrideProperties": {
+      "type": "object",
+      "properties": {
+        "Id": { "type": "string" },
+        "CacheSettings": { "$ref": "#/$defs/cacheSettings" },
+        "BatchCacheSettings": { "$ref": "#/$defs/batchCacheSettings" },
+        "ConcurrentSettings": { "$ref": "#/$defs/concurrentSettings" }
+      },
+      "additionalProperties": true
+    },
+    "experimentComponentOverrideConfig": {
+        "type": "object",
+        "properties": {
+            "Properties": { "$ref": "#/$defs/experimentComponentOverrideProperties" },
+            "Parameters": { "type": "object", "additionalProperties": true }
+        },
+        "additionalProperties": false
+    },
+    "experimentSubComponentRegistry": {
+        "type": "object",
+        "patternProperties": {
+            "^\\w+$": { "$ref": "#/$defs/experimentComponentOverrideConfig" }
+        },
+        "additionalProperties": false
+    },
+    "experimentConfig": {
+      "type": "object",
+      "properties": {
+        "RankingFlowRegistry": { "type": "object", "patternProperties": {"^\\w+$": {"$ref": "#/$defs/rankingFlowDefinition"}}, "additionalProperties": false },
+        "RankingTraitRegistry": { "type": "object", "patternProperties": {"^\\w+$": {"$ref": "#/$defs/rankingTraitDefinition"}}, "additionalProperties": false },
+        "RankingStageRegistry": { "type": "object", "patternProperties": {"^\\w+$": {"$ref": "#/$defs/rankingStageDefinition"}}, "additionalProperties": false },
+        "CandidateGeneratorRegistry": { "$ref": "#/$defs/experimentSubComponentRegistry" },
+        "CandidateFilterRegistry": { "$ref": "#/$defs/experimentSubComponentRegistry" },
+        "CandidateScorerRegistry": { "$ref": "#/$defs/experimentSubComponentRegistry" },
+        "CandidateProcessorRegistry": { "$ref": "#/$defs/experimentSubComponentRegistry" },
+        "ContextFeatureFetcherRegistry": { "$ref": "#/$defs/experimentSubComponentRegistry" },
+        "CandidateFeatureFetcherRegistry": { "$ref": "#/$defs/experimentSubComponentRegistry" }
+      },
+      "additionalProperties": false
+    },
+    "experimentRegistry": {
+      "type": "object",
+      "patternProperties": {
+        "^\\w+$": { "$ref": "#/$defs/experimentConfig" }
+      },
+      "additionalProperties": false
+    }
+  }
 }
