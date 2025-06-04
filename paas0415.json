@@ -138,7 +138,7 @@
           "CandidateFeatureFetchers": { "type": "array", "items": { "type": "string" } },
           "CandidateFilters": { "type": "array", "items": { "type": "string" } },
           "CandidateScorer": { "type": "string" },
-          "CandidateProcessors": { "type": "array", "items": { "type": "string" } },
+          "CandidatePostProcessors": { "type": "array", "items": { "type": "string" } },
           "Settings": {
             "type": "object",
             "properties": {
